@@ -17,34 +17,59 @@ const items = [
   { id: '6', text: 'step6' },
 ]
 
+const squares = [
+  'x', 'o', 'x',
+  'o', 'x', 'o',
+  null, null, null,
+]
+
+function Square(props) {
+  if(props.value == 'x' ){
+    return (
+      <Image
+        style={styles.image}
+        source={require('./images/x.png')}
+      />
+    )
+  }else if(props.value == 'o'){
+    return (
+      <Image
+        style={styles.image}
+        source={require('./images/o.png')}
+      />
+    )
+  }else{
+    return (
+      <Image
+        style={styles.image}
+        source={require('./images/blank.png')}
+      />
+    )
+  };
+}
+
 export default function App() {
   return (
     <View>
       <View style={styles.board}>
         <View style={styles.row}>
-          <Image
-            style={styles.image}
-            source={require('./images/x.png')}
-          />
-          <Image
-            style={styles.image}
-            source={require('./images/o.png')}
-          />
-          <Image
-            style={styles.image}
-            source={require('./images/blank.png')}
-          />
+          <Square value={squares[0]}/>
+          <Square value={squares[1]}/>
+          <Square value={squares[2]}/>
         </View>
         <View style={styles.row}>
-          <View style={styles.square} />
-          <View style={styles.square} />
-          <View style={styles.square} />
+          <Square value={squares[3]}/>
+          <Square value={squares[4]}/>
+          <Square value={squares[5]}/>
         </View>
         <View style={styles.row}>
-          <View style={styles.square} />
-          <View style={styles.square} />
-          <View style={styles.square} />
+          <Square value={squares[6]}/>
+          <Square value={squares[7]}/>
+          <Square value={squares[8]}/>
         </View>
+      </View>
+      <View style={styles.next_player}>
+        <Text>hello</Text>
       </View>
       <ScrollView
         //contentContainerStyle={{ flexGrow: 1 }}
@@ -67,6 +92,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  next_player: {
+    borderWidth:1,
+    borderColor: 'black',
+    alignItems: 'center',
+    marginBottom: 10
   },
   board: {
     //flex:1,
