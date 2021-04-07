@@ -17,12 +17,6 @@ const items = [
   { id: '6', text: 'step6' },
 ]
 
-const squares = [
-  'x', 'o', 'x',
-  'o', 'x', 'o',
-  null, null, null,
-]
-
 function Square(props) {
   if(props.value == 'x' ){
     return (
@@ -48,45 +42,87 @@ function Square(props) {
   };
 }
 
-export default function App() {
-  return (
-    <View>
+class Board extends React.Component {
+  renderSquare(i) {
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
+  }
+
+  render() {
+    return (
       <View style={styles.board}>
         <View style={styles.row}>
-          <Square value={squares[0]}/>
-          <Square value={squares[1]}/>
-          <Square value={squares[2]}/>
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
         </View>
         <View style={styles.row}>
-          <Square value={squares[3]}/>
-          <Square value={squares[4]}/>
-          <Square value={squares[5]}/>
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
         </View>
         <View style={styles.row}>
-          <Square value={squares[6]}/>
-          <Square value={squares[7]}/>
-          <Square value={squares[8]}/>
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
         </View>
       </View>
-      <View style={styles.next_player}>
-        <Text>hello</Text>
+    );
+  }
+}
+
+export default class App extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [
+        {
+          squares: Array(9).fill(null)
+        }
+      ],
+      stepNumber: 0,
+      xIsNext: true
+    };
+  }
+
+  handleClick(i) {
+     const history = this.state.history.slice(0, this.state.stepNumber + 1);
+     const current = history[history.length - 1];
+     const squares = current.squares.slice();
+     /*
+     if (calculateWinner(squares) || squares[i]) {
+       return;
+     }*/
+
+     squares[i] = this.state.xIsNext ? "X" : "O";
+     this.setState({
+       history: history.concat([
+         {
+           squares: squares
+         }
+       ]),
+       stepNumber: history.length,
+       xIsNext: !this.state.xIsNext
+     });
+  }
+
+  render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+
+    return (
+      <View>
+        <Board
+          squares={current.squares}
+          onClick={() => {}}
+        />
       </View>
-      <ScrollView
-        //contentContainerStyle={{ flexGrow: 1 }}
-        style={styles.steplist}>
-        {items.map((item) => (
-          <TouchableOpacity
-            style={styles.step}
-            activeOpacity={0.7}
-            key={item.id}
-            onPress={() => {
-            }}>
-            <Text style={styles.step}>{item.text}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
-  )
+    );
+  }
 }
 
 const styles = StyleSheet.create({
