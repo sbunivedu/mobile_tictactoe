@@ -136,9 +136,38 @@ export default class App extends React.Component{
      });
   }
 
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0
+    });
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
+    const winner = this.calculateWinner(current.squares);
+
+/*
+    const moves = history.map((step, move) => {
+      const desc = move ?
+        'Go to move #' + move :
+        'Go to game start';
+      return (
+
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+        </li>
+      );
+    });
+*/
+
+    let status;
+    if (winner) {
+      status = "Winner: " + winner;
+    } else {
+      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+    }
 
     return (
       <View>
@@ -146,6 +175,34 @@ export default class App extends React.Component{
           squares={current.squares}
           onClick={(i)=>this.handleClick(i)}
         />
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.status}>{status}</Text>
+        </View>
+        <ScrollView
+          //contentContainerStyle={{ flexGrow: 1 }}
+          style={styles.steplist}>
+          {history.map((step, move) => {
+            const desc = move ?
+              'Go to move #' + move :
+              'Go to game start';
+              /*
+            return (
+
+              <li key={move}>
+                <button onClick={() => this.jumpTo(move)}>{desc}</button>
+              </li>
+            );*/
+            return (
+              <TouchableOpacity
+                style={styles.step}
+                activeOpacity={0.7}
+                key={move}
+                onPress={()=>{this.jumpTo(move)}}>
+                <Text style={styles.step}>{desc}</Text>
+              </TouchableOpacity>
+           )}
+         )}
+        </ScrollView>
       </View>
     );
   }
@@ -155,11 +212,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  next_player: {
+  status: {
     borderWidth:1,
     borderColor: 'black',
-    alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 10,
+    fontSize: 30,
   },
   board: {
     //flex:1,
@@ -200,5 +257,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     marginRight: 5,
     backgroundColor: 'skyblue',
+    fontSize: 30,
   }
 })
