@@ -1,21 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   View,
+  SafeAreaView,
   StyleSheet,
   ScrollView,
   Text,
   TouchableOpacity,
-  Image } from 'react-native'
-
-const items = [
-  { id: '0', text: 'step0' },
-  { id: '1', text: 'step1' },
-  { id: '2', text: 'step2' },
-  { id: '3', text: 'step3' },
-  { id: '4', text: 'step4' },
-  { id: '5', text: 'step5' },
-  { id: '6', text: 'step6' },
-]
+  Image,
+  useWindowDimensions
+} from 'react-native'
 
 function Square(props) {
   if(props.value == 'X' ){
@@ -80,21 +73,18 @@ class Board extends React.Component {
   }
 }
 
-export default class App extends React.Component{
-  constructor(props) {
-    super(props);
-    this.state = {
-      history: [
-        {
-          squares: Array(9).fill(null)
-        }
-      ],
-      stepNumber: 0,
-      xIsNext: true
-    };
-  }
+export default function App(){
+  const [state, setState] = useState({
+    history: [
+      {
+        squares: Array(9).fill(null)
+      }
+    ],
+    stepNumber: 0,
+    xIsNext: true
+  });
 
-  calculateWinner(squares) {
+  const calculateWinner = (squares) => {
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -114,98 +104,83 @@ export default class App extends React.Component{
     return null;
   }
 
-  handleClick(i) {
+  const handleClick = (i) => {
     console.log(i);
-     const history = this.state.history.slice(0, this.state.stepNumber + 1);
+     const history = state.history.slice(0, state.stepNumber + 1);
      const current = history[history.length - 1];
      const squares = current.squares.slice();
 
-     if (this.calculateWinner(squares) || squares[i]) {
+     if (calculateWinner(squares) || squares[i]) {
        return;
      }
 
-     squares[i] = this.state.xIsNext ? "X" : "O";
-     this.setState({
+     squares[i] = state.xIsNext ? "X" : "O";
+     setState({
        history: history.concat([
          {
            squares: squares
          }
        ]),
        stepNumber: history.length,
-       xIsNext: !this.state.xIsNext
+       xIsNext: !state.xIsNext,
+       screenWidth: null,
+       screenHeight: null,
      });
   }
 
-  jumpTo(step) {
-    this.setState({
+  const jumpTo = (step) => {
+    setState({
+      history: state.history,
       stepNumber: step,
       xIsNext: (step % 2) === 0
     });
   }
 
-  render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = this.calculateWinner(current.squares);
+  const history = state.history;
+  const current = history[state.stepNumber];
+  const winner = calculateWinner(current.squares);
 
-/*
-    const moves = history.map((step, move) => {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
-      return (
-
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
-*/
-
-    let status;
-    if (winner) {
-      status = "Winner: " + winner;
-    } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
-    }
-
-    return (
-      <View>
-        <Board
-          squares={current.squares}
-          onClick={(i)=>this.handleClick(i)}
-        />
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.status}>{status}</Text>
-        </View>
-        <ScrollView
-          //contentContainerStyle={{ flexGrow: 1 }}
-          style={styles.steplist}>
-          {history.map((step, move) => {
-            const desc = move ?
-              'Go to move #' + move :
-              'Go to game start';
-              /*
-            return (
-
-              <li key={move}>
-                <button onClick={() => this.jumpTo(move)}>{desc}</button>
-              </li>
-            );*/
-            return (
-              <TouchableOpacity
-                style={styles.step}
-                activeOpacity={0.7}
-                key={move}
-                onPress={()=>{this.jumpTo(move)}}>
-                <Text style={styles.step}>{desc}</Text>
-              </TouchableOpacity>
-           )}
-         )}
-        </ScrollView>
-      </View>
-    );
+  let status;
+  if (winner) {
+    status = "Winner: " + winner;
+  } else {
+    status = "Next player: " + (state.xIsNext ? "X" : "O");
   }
+
+  const window = useWindowDimensions();
+  const SCREEN_WIDTH = window.width;
+  const SCREEN_HEIGHT = window.height;
+  console.log("width:"+SCREEN_WIDTH+" height:"+SCREEN_HEIGHT);
+
+  return (
+    <SafeAreaView style={ SCREEN_HEIGHT > SCREEN_WIDTH?
+      styles.ContainerPortrait : styles.ContainerLandscape }>
+      <Board
+        squares={current.squares}
+        onClick={(i)=>handleClick(i)}
+      />
+      <View style={{alignItems: 'center'}}>
+        <Text style={styles.status}>{status}</Text>
+      </View>
+      <ScrollView
+        style={styles.steplist}>
+        {history.map((step, move) => {
+          const desc = move ?
+            'Go to move #' + move :
+            'Go to game start';
+          return (
+            <TouchableOpacity
+              style={styles.step}
+              activeOpacity={0.7}
+              key={move}
+              onPress={()=>{jumpTo(move)}}>
+              <Text style={styles.step}>{desc}</Text>
+            </TouchableOpacity>
+         )}
+       )}
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -246,7 +221,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
   },
   steplist: {
-    //flex: 1,
+    flex: 1,
     //margin: 50,
     borderWidth: 1,
     //borderColor: 'black',
@@ -258,5 +233,17 @@ const styles = StyleSheet.create({
     marginRight: 5,
     backgroundColor: 'skyblue',
     fontSize: 30,
-  }
+  },
+  ContainerPortrait: {
+    flex: 1,
+    flexDirection: 'column',
+    //justifyContent: 'center',
+    //alignItems: 'center'
+  },
+  ContainerLandscape: {
+    flex: 1,
+    flexDirection: 'row',
+    //justifyContent: 'center',
+    //alignItems: 'center'
+  },
 })
